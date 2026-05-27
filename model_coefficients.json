@@ -1,0 +1,19 @@
+{
+  "intercept": 14.478,
+  "coefficients": {
+    "StudyHours": 0.8283,
+    "Attendance": 0.2483,
+    "SleepHours": 1.1149,
+    "ScreenTime": -0.1189,
+    "ParentalInvolvement": 1.7788,
+    "Tutoring": 3.4223,
+    "Extracurricular": 0.8141,
+    "StressLevel": -0.4583,
+    "PreTestScore": 0.3766
+  },
+  "metrics": {
+    "r2_score": 0.9411,
+    "mae": 1.8527,
+    "sample_size": 1000
+  }
+}
