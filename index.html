@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aegis - Student Performance Analytics & Predictor</title>
+  <meta name="description" content="AI-powered student performance prediction dashboard using multiple linear regression. Analyze academic factors and predict final grades in real-time.">
+  
+  <!-- Premium Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+  
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="app-container">
+    
+    <!-- Header -->
+    <header class="main-header">
+      <div class="brand">
+        <div class="logo-glow"></div>
+        <svg class="brand-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="brand-text">
+          <h1>AEGIS</h1>
+          <span class="subtitle">Academic Performance Predictor</span>
+        </div>
+      </div>
+      
+      <div class="header-stats">
+        <div class="stat-bubble">
+          <span class="bubble-label">Model Status</span>
+          <span class="bubble-val success-text">
+            <span class="pulse-dot green"></span> Active Model
+          </span>
+        </div>
+        <div class="stat-bubble">
+          <span class="bubble-label">System Accuracy</span>
+          <span class="bubble-val" id="model-r2">R² = 0.923</span>
+        </div>
+        <div class="stat-bubble">
+          <span class="bubble-label">Dataset Size</span>
+          <span class="bubble-val" id="dataset-size">1000 records</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content Grid -->
+    <main class="dashboard-grid">
+      
+      <!-- Left Column: Sliders & Controls -->
+      <section class="control-panel glass-card" id="control-panel-section">
+        <div class="panel-header">
+          <svg class="panel-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="4" y1="21" x2="4" y2="14"></line>
+            <line x1="4" y1="10" x2="4" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12" y2="3"></line>
+            <line x1="20" y1="21" x2="20" y2="16"></line>
+            <line x1="20" y1="12" x2="20" y2="3"></line>
+            <line x1="2" y1="14" x2="6" y2="14"></line>
+            <line x1="10" y1="8" x2="14" y2="8"></line>
+            <line x1="18" y1="16" x2="22" y2="16"></line>
+          </svg>
+          <h2>Student Parameters</h2>
+        </div>
+        
+        <!-- Preset Profiles Selector -->
+        <div class="presets-container">
+          <span class="section-label">Quick Presets:</span>
+          <div class="presets-row">
+            <button class="preset-btn" data-preset="achiever" id="preset-achiever">High Achiever</button>
+            <button class="preset-btn" data-preset="average" id="preset-average">Average Student</button>
+            <button class="preset-btn" data-preset="atrisk" id="preset-atrisk">At Risk</button>
+          </div>
+        </div>
+
+        <form id="predictor-form" class="sliders-form">
+          <!-- Study Hours per Week -->
+          <div class="form-group">
+            <div class="label-row">
+              <label for="study-hours">Study Hours <span class="unit">(weekly)</span></label>
+              <span class="value-display" id="study-hours-val">15.0h</span>
+            </div>
+            <input type="range" id="study-hours" name="study-hours" min="8" max="30" step="0.5" value="15.0" class="gradient-slider">
+            <div class="slider-ticks">
+              <span>8h</span>
+              <span>19h</span>
+              <span>30h</span>
+            </div>
+          </div>
+
+          <!-- Attendance Rate -->
+          <div class="form-group">
+            <div class="label-row">
+              <label for="attendance">Attendance Rate</label>
+              <span class="value-display" id="attendance-val">85%</span>
+            </div>
+            <input type="range" id="attendance" name="attendance" min="70" max="100" step="1" value="85" class="gradient-slider">
+            <div class="slider-ticks">
+              <span>70%</span>
+              <span>85%</span>
+              <span>100%</span>
+            </div>
+          </div>
+
+          <!-- Previous Grade -->
+          <div class="form-group">
+            <div class="label-row">
+              <label for="pretest-score">Previous Grade</label>
+              <span class="value-display" id="pretest-score-val">78%</span>
+            </div>
+            <input type="range" id="pretest-score" name="pretest-score" min="60" max="90" step="1" value="78" class="gradient-slider">
+            <div class="slider-ticks">
+              <span>60%</span>
+              <span>75%</span>
+              <span>90%</span>
+            </div>
+          </div>
+
+          <!-- Extracurricular Activities -->
+          <div class="form-group">
+            <div class="label-row">
+              <label for="extracurricular">Extracurricular Activities</label>
+              <span class="value-display" id="extracurricular-val">1</span>
+            </div>
+            <input type="range" id="extracurricular" name="extracurricular" min="0" max="3" step="1" value="1" class="gradient-slider">
+            <div class="slider-ticks">
+              <span>0 (None)</span>
+              <span>2</span>
+              <span>3 (High)</span>
+            </div>
+          </div>
+
+          <!-- Sleep Hours -->
+          <div class="form-group">
+            <div class="label-row">
+              <label for="sleep-hours">Sleep Hours <span class="unit">(daily)</span></label>
+              <span class="value-display" id="sleep-hours-val">7.5h</span>
+            </div>
+            <input type="range" id="sleep-hours" name="sleep-hours" min="4" max="10" step="0.5" value="7.5" class="gradient-slider">
+            <div class="slider-ticks">
+              <span>4h</span>
+              <span>7h</span>
+              <span>10h</span>
+            </div>
+          </div>
+
+          <!-- Screen Time -->
+          <div class="form-group">
+            <div class="label-row">
+              <label for="screen-time">Screen Time <span class="unit">(daily)</span></label>
+              <span class="value-display" id="screen-time-val">2.5h</span>
+            </div>
+            <input type="range" id="screen-time" name="screen-time" min="0" max="5" step="0.1" value="2.5" class="gradient-slider">
+            <div class="slider-ticks">
+              <span>0h</span>
+              <span>2.5h</span>
+              <span>5h</span>
+            </div>
+          </div>
+
+          <!-- Dropdowns & Boolean Grid -->
+          <div class="form-grid-2x2">
+            
+            <!-- Parental Support -->
+            <div class="form-group-sub">
+              <label for="parental-involvement">Parental Support</label>
+              <div class="select-wrapper">
+                <select id="parental-involvement" name="parental-involvement">
+                  <option value="Low">Low</option>
+                  <option value="Medium" selected>Medium</option>
+                  <option value="High">High</option>
+                </select>
+                <svg class="select-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+              </div>
+            </div>
+
+            <!-- Gender -->
+            <div class="form-group-sub">
+              <label for="gender">Gender</label>
+              <div class="select-wrapper">
+                <select id="gender" name="gender">
+                  <option value="Male" selected>Male</option>
+                  <option value="Female">Female</option>
+                </select>
+                <svg class="select-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+              </div>
+            </div>
+
+            <!-- Online Classes Taken -->
+            <div class="form-group-sub">
+              <label>Online Classes</label>
+              <div class="toggle-container">
+                <input type="checkbox" id="online-classes" class="toggle-checkbox">
+                <label for="online-classes" class="toggle-label">
+                  <span class="toggle-inner"></span>
+                  <span class="toggle-switch"></span>
+                </label>
+              </div>
+            </div>
+            
+            <div class="form-group-sub reset-btn-container">
+              <button type="button" id="btn-reset-fields" class="btn-secondary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="btn-icon-svg">
+                  <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                </svg>
+                Reset Default
+              </button>
+            </div>
+            
+          </div>
+        </form>
+      </section>
+      
+      <!-- Right Column: Predictor Gauge & Analysis Tabs -->
+      <section class="analysis-panel">
+        
+        <!-- Output Grade Gauge (Vibrant Header Card) -->
+        <div class="prediction-hero glass-card" id="prediction-hero-card">
+          <div class="hero-left">
+            <span class="card-eyebrow">PREDICTED ACADEMIC STATUS</span>
+            <div class="grade-badge-glow" id="grade-badge">B</div>
+            <div class="score-display">
+              <span class="score-num" id="predicted-score-pct">78.5%</span>
+              <span class="score-label" id="predicted-score-label">Final Grade Expectation</span>
+            </div>
+          </div>
+          
+          <div class="hero-right">
+            <div class="risk-badge-container">
+              <span class="badge-title">Failing Risk Status</span>
+              <div class="risk-badge" id="risk-badge">
+                <span class="pulse-dot" id="risk-dot"></span>
+                <span id="risk-text">Low Risk</span>
+              </div>
+            </div>
+            
+            <div class="improvement-path" id="improvement-card">
+              <div class="path-icon-container">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                  <polyline points="17 6 23 6 23 12"></polyline>
+                </svg>
+              </div>
+              <div class="path-details">
+                <span class="path-label" id="path-label">Path to Grade A</span>
+                <span class="path-desc" id="path-desc">Increase study time by 3.5 hrs and attendance by 5%.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Interactive Tabs for Deep Analysis -->
+        <div class="tabs-card glass-card">
+          <div class="tab-headers">
+            <button class="tab-btn active" data-tab="tab-recommendations" id="tab-btn-recommendations">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="tab-icon"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+              Recommendations
+            </button>
+            <button class="tab-btn" data-tab="tab-whatif" id="tab-btn-whatif">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="tab-icon"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M13 6h3a2 2 0 0 1 2 2v7"/><path d="M6 9v7a3 3 0 0 0 3 3h5"/></svg>
+              What-If Analyzer
+            </button>
+            <button class="tab-btn" data-tab="tab-charts" id="tab-btn-charts">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="tab-icon"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+              Visual Analytics
+            </button>
+            <button class="tab-btn" data-tab="tab-explorer" id="tab-btn-explorer">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="tab-icon"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/></svg>
+              Data Explorer
+            </button>
+          </div>
+          
+          <div class="tab-contents">
+            
+            <!-- Tab: Recommendations -->
+            <div class="tab-pane active" id="tab-recommendations">
+              <div class="pane-header">
+                <h3>Actionable Study Insights</h3>
+                <p>Personalized optimization plan based on active regression calculations.</p>
+              </div>
+              
+              <div class="insights-container" id="insights-list">
+                <!-- Dynamically filled by app.js -->
+              </div>
+            </div>
+
+            <!-- Tab: What-If Analyzer -->
+            <div class="tab-pane" id="tab-whatif">
+              <div class="pane-header">
+                <h3>What-If Scenario Comparisons</h3>
+                <p>Pin a benchmark configuration to track how your adjustments impact grades relative to baseline.</p>
+              </div>
+              
+              <div class="whatif-container">
+                <div class="whatif-actions">
+                  <button type="button" id="btn-pin-scenario" class="btn-primary">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="btn-icon-svg"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                    Set Current as Benchmark (Scenario A)
+                  </button>
+                  <button type="button" id="btn-clear-scenario" class="btn-secondary" disabled>
+                    Clear Benchmark
+                  </button>
+                </div>
+                
+                <div class="whatif-comparison-grid">
+                  <!-- Scenario A -->
+                  <div class="scenario-card glass-subcard" id="scenario-a-card">
+                    <div class="scenario-header">
+                      <span class="scenario-badge badge-a">Scenario A (Benchmark)</span>
+                      <h4 class="scenario-name">Not Set</h4>
+                    </div>
+                    <div class="scenario-score-display">-</div>
+                    <ul class="scenario-details-list">
+                      <li class="empty-state">Save a benchmark state to compare side-by-side.</li>
+                    </ul>
+                  </div>
+                  
+                  <!-- Scenario B -->
+                  <div class="scenario-card glass-subcard active" id="scenario-b-card">
+                    <div class="scenario-header">
+                      <span class="scenario-badge badge-b">Scenario B (Current)</span>
+                      <h4 class="scenario-name">Active Session</h4>
+                    </div>
+                    <div class="scenario-score-display" id="scenario-b-score">78.5% (Grade B)</div>
+                    <ul class="scenario-details-list" id="scenario-b-details">
+                      <!-- Filled dynamically -->
+                    </ul>
+                  </div>
+                </div>
+                
+                <div class="whatif-delta-summary glass-subcard" id="whatif-delta-card" style="display:none;">
+                  <div class="delta-header">Performance Difference</div>
+                  <div class="delta-value" id="whatif-delta-val">+5.2%</div>
+                  <div class="delta-explanation" id="whatif-delta-desc">Scenario B is outperforming Scenario A.</div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Tab: Charts -->
+            <div class="tab-pane" id="tab-charts">
+              <div class="pane-header">
+                <h3>Visual Explanations & Model Analytics</h3>
+                <p>Analyze feature impact weights and final grade distribution from the student dataset.</p>
+              </div>
+              
+              <div class="charts-grid">
+                <div class="chart-container">
+                  <span class="chart-title">Relative Feature Influence (Regression Coefficients)</span>
+                  <div class="canvas-wrapper">
+                    <canvas id="coefficientsChart"></canvas>
+                  </div>
+                </div>
+                <div class="chart-container">
+                  <span class="chart-title">Dataset Performance Distribution</span>
+                  <div class="canvas-wrapper">
+                    <canvas id="distributionChart"></canvas>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Tab: Data Explorer -->
+            <div class="tab-pane" id="tab-explorer">
+              <div class="pane-header">
+                <h3>Student Data Navigator</h3>
+                <p>Browse through the dataset. Click "Load Profile" on any row to import their parameters into the prediction simulator.</p>
+              </div>
+              
+              <div class="explorer-toolbar">
+                <div class="search-box">
+                  <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                  <input type="text" id="explorer-search" placeholder="Search by student name or ID...">
+                </div>
+                <div class="filter-count">
+                  Showing <span id="displayed-records-count">0</span> of <span id="total-records-count">0</span> records
+                </div>
+              </div>
+              
+              <div class="table-container">
+                <table class="explorer-table" id="student-table">
+                  <thead>
+                    <tr>
+                      <th data-sort="StudentID">ID <span class="sort-indicator"></span></th>
+                      <th data-sort="Name">Name <span class="sort-indicator"></span></th>
+                      <th data-sort="Gender">Gender <span class="sort-indicator"></span></th>
+                      <th data-sort="StudyHoursPerWeek">Study Hours <span class="sort-indicator"></span></th>
+                      <th data-sort="AttendanceRate">Attendance <span class="sort-indicator"></span></th>
+                      <th data-sort="PreviousGrade">Prev Grade <span class="sort-indicator"></span></th>
+                      <th data-sort="SleepHours">Sleep Hours <span class="sort-indicator"></span></th>
+                      <th data-sort="ScreenTime">Screen Time <span class="sort-indicator"></span></th>
+                      <th data-sort="FinalGrade">Final Grade <span class="sort-indicator"></span></th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="student-table-body">
+                    <!-- Loaded dynamically from dataset.js -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            
+          </div>
+        </div>
+        
+      </section>
+      
+    </main>
+  </div>
+
+  <!-- Script Imports -->
+  <script src="dataset.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
